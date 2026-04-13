@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LavaMax — Agendamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #07090E;
+  --navy: #0C1120;
+  --panel: #111827;
+  --card: #161E2E;
+  --card2: #1C2840;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --white: #FFFFFF;
+  --off: #C8D0DE;
+  --muted: #6B7891;
+  --green: #00D46A;
+  --green2: #00A855;
+  --blue: #2196F3;
+  --amber: #FFB300;
+  --red: #FF4444;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: 'Manrope', sans-serif;
+  background: var(--black);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ——— LAYOUT ——— */
+.app {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 16px 80px;
+}
+
+/* ——— HEADER ——— */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 36px;
+}
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: .05em;
+  color: var(--white);
+  text-decoration: none;
+}
+.logo span { color: var(--green); }
+.header-tag {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ——— STEPPER ——— */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 40px;
+}
+.step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  position: relative;
+}
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: calc(50% + 18px);
+  right: calc(-50% + 18px);
+  height: 1px;
+  background: var(--border2);
+  top: 18px;
+  z-index: 0;
+}
+.step-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  transition: all .3s;
+  border: 1.5px solid var(--border2);
+  background: var(--panel);
+  color: var(--muted);
+}
+.step.active .step-circle {
+  background: var(--green);
+  border-color: var(--green);
+  color: #000;
+  box-shadow: 0 0 0 4px rgba(0,212,106,.15);
+}
+.step.done .step-circle {
+  background: rgba(0,212,106,.12);
+  border-color: var(--green2);
+  color: var(--green);
+}
+.step-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color .3s;
+  white-space: nowrap;
+}
+.step.active .step-label { color: var(--green); }
+.step.done .step-label { color: var(--off); }
+
+/* ——— PANELS ——— */
+.panel {
+  display: none;
+  animation: fadeUp .35s ease both;
+}
+.panel.active { display: block; }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+/* ——— SECTION TITLE ——— */
+.section-title {
+  margin-bottom: 24px;
+}
+.section-title h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: .02em;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.section-title h2 span { color: var(--green); }
+.section-title p { font-size: 14px; color: var(--muted); }
+
+/* ——— WEEK CALENDAR ——— */
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.week-nav span {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--off);
+}
+.week-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  color: var(--off);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+}
+.week-btn:hover { background: var(--card2); border-color: rgba(255,255,255,.2); }
+.week-btn:disabled { opacity:.3; cursor:not-allowed; }
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 32px;
+}
+.day-card {
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+}
+.day-card:hover:not(.full):not(.past) { border-color: rgba(0,212,106,.35); background: var(--card); }
+.day-card.selected {
+  border-color: var(--green);
+  background: rgba(0,212,106,.08);
+  box-shadow: 0 0 0 3px rgba(0,212,106,.12);
+}
+.day-card.past { opacity:.35; cursor:not-allowed; }
+.day-card.full { opacity:.45; cursor:not-allowed; }
+.day-card.today .day-num::after {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  position: absolute;
+  bottom: -8px;
+  left: 50%; transform: translateX(-50%);
+}
+.day-name {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.day-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--white);
+  position: relative;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+.day-card.selected .day-num { color: var(--green); }
+.day-availability {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  padding: 3px 8px;
+  border-radius: 20px;
+  display: inline-block;
+}
+.avail-free { background: rgba(0,212,106,.12); color: var(--green); }
+.avail-partial { background: rgba(255,179,0,.12); color: var(--amber); }
+.avail-full { background: rgba(255,68,68,.1); color: var(--red); }
+
+/* ——— TIME SLOTS ——— */
+.slots-section { margin-bottom: 32px; }
+.slots-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.slots-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.slot {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  border: 1.5px solid;
+  background: transparent;
+  font-family: 'Manrope', sans-serif;
+}
+.slot.free { border-color: rgba(0,212,106,.3); color: var(--green); }
+.slot.free:hover { background: rgba(0,212,106,.1); border-color: var(--green); }
+.slot.selected { background: var(--green); border-color: var(--green); color: #000; }
+.slot.taken { border-color: var(--border); color: var(--muted); text-decoration: line-through; cursor:not-allowed; opacity:.5; }
+.slot.partial { border-color: rgba(255,179,0,.3); color: var(--amber); }
+.slot.partial:hover { background: rgba(255,179,0,.1); }
+
+.slots-empty {
+  font-size: 14px;
+  color: var(--muted);
+  padding: 20px 0;
+}
+.no-day-selected {
+  background: var(--panel);
+  border: 1px dashed var(--border2);
+  border-radius: 14px;
+  padding: 28px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+.no-day-selected .icon { font-size: 32px; margin-bottom: 10px; }
+
+/* ——— STEP 1 FOOTER ——— */
+.step-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.selected-summary {
+  font-size: 14px;
+  color: var(--off);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.selected-summary .chip {
+  background: rgba(0,212,106,.1);
+  border: 1px solid rgba(0,212,106,.25);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+
+/* ——— BUTTONS ——— */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green);
+  color: #000;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  padding: 14px 28px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-primary:hover { background: #00f07a; transform: translateY(-1px); }
+.btn-primary:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--off);
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 13px 20px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border2);
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.04); }
+
+/* ——— STEP 2: FORM ——— */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  background: var(--panel);
+  border: 1.5px solid var(--border2);
+  color: var(--white);
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+  padding: 13px 16px;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .2s;
+  width: 100%;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus { border-color: var(--green); }
+.form-group input::placeholder { color: var(--muted); }
+.form-group select option { background: #1C2840; }
+.form-group textarea { resize: vertical; min-height: 80px; }
+
+/* SERVICE CARDS */
+.service-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.svc-card {
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all .2s;
+  text-align: left;
+}
+.svc-card:hover { border-color: rgba(0,212,106,.3); background: var(--card); }
+.svc-card.selected { border-color: var(--green); background: rgba(0,212,106,.07); }
+.svc-emoji { font-size: 24px; margin-bottom: 8px; }
+.svc-name { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.svc-duration { font-size: 11px; color: var(--muted); }
+.svc-price { font-size: 13px; font-weight: 700; color: var(--green); margin-top: 6px; }
+
+/* HIDDEN FIELD FOR SERVICE */
+input[type="hidden"] {}
+
+/* ——— BOOKING SUMMARY CARD ——— */
+.booking-card {
+  background: var(--card);
+  border: 1.5px solid var(--border2);
+  border-radius: 18px;
+  padding: 28px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.booking-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--green), var(--blue));
+}
+.booking-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.confirm-icon {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: rgba(0,212,106,.12);
+  border: 1px solid rgba(0,212,106,.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+.booking-card-header h3 { font-size: 20px; font-weight: 700; }
+.booking-card-header p { font-size: 13px; color: var(--muted); }
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.detail-item {}
+.detail-item .dlabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.detail-item .dvalue {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+}
+.detail-item .dvalue.green { color: var(--green); }
+.divider-h { height: 1px; background: var(--border); margin: 20px 0; grid-column: 1/-1; }
+
+/* WPP MESSAGE PREVIEW */
+.wpp-preview {
+  background: #0A1628;
+  border: 1px solid rgba(37,211,102,.2);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.wpp-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.wpp-preview-header .wpp-icon {
+  width: 32px; height: 32px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.wpp-preview-header .wpp-icon svg { width: 18px; height: 18px; fill: #fff; }
+.wpp-preview-header span { font-size: 13px; font-weight: 700; color: #25D366; }
+.wpp-msg-bubble {
+  background: #1E3A2F;
+  border-radius: 0 12px 12px 12px;
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #C8EFDB;
+  white-space: pre-line;
+  border: 1px solid rgba(37,211,102,.12);
+}
+
+/* WPP BTN */
+.btn-wpp {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #25D366;
+  color: #000;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  padding: 18px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all .2s;
+  text-decoration: none;
+}
+.btn-wpp:hover { background: #20c25c; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(37,211,102,.3); }
+.btn-wpp svg { width: 24px; height: 24px; fill: #000; }
+
+/* FLOATING WPP */
+.fab {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  z-index: 99;
+  width: 58px; height: 58px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 24px rgba(37,211,102,.4);
+  text-decoration: none;
+  transition: all .2s;
+  animation: floatin .4s ease .8s both;
+}
+@keyframes floatin { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
+.fab:hover { transform: scale(1.1); box-shadow: 0 10px 32px rgba(37,211,102,.5); }
+.fab svg { width: 28px; height: 28px; fill: #fff; }
+.fab-pulse {
+  position: absolute;
+  top: -3px; right: -3px;
+  width: 14px; height: 14px;
+  background: var(--amber);
+  border-radius: 50%;
+  border: 2px solid var(--black);
+  animation: pulseIt 1.8s infinite;
+}
+@keyframes pulseIt { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .days-grid { grid-template-columns: repeat(3, 1fr); }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-group.full { grid-column: 1; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .stepper { gap: 4px; }
+  .step-label { font-size: 9px; }
+  .service-options { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- HEADER -->
+  <header>
+    <a href="#" class="logo">Lava<span>Max</span></a>
+    <span class="header-tag">Sistema de Agendamento</span>
+  </header>
+
+  <!-- STEPPER -->
+  <div class="stepper">
+    <div class="step active" id="step-ind-1">
+      <div class="step-content">
+        <div class="step-circle">1</div>
+        <span class="step-label">Horário</span>
+      </div>
+    </div>
+    <div class="step" id="step-ind-2">
+      <div class="step-content">
+        <div class="step-circle">2</div>
+        <span class="step-label">Seus dados</span>
+      </div>
+    </div>
+    <div class="step" id="step-ind-3">
+      <div class="step-content">
+        <div class="step-circle">3</div>
+        <span class="step-label">Confirmar</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 1: CALENDÁRIO ===== -->
+  <div class="panel active" id="panel-1">
+    <div class="section-title">
+      <h2 class="display">Escolha o <span>dia</span> e horário</h2>
+      <p>Selecione um dia disponível e depois o horário de preferência</p>
+    </div>
+
+    <!-- WEEK NAV -->
+    <div class="week-nav">
+      <button class="week-btn" id="prev-week" onclick="changeWeek(-1)" disabled>‹</button>
+      <span id="week-label">Carregando...</span>
+      <button class="week-btn" id="next-week" onclick="changeWeek(1)">›</button>
+    </div>
+
+    <!-- DAYS GRID -->
+    <div class="days-grid" id="days-grid"></div>
+
+    <!-- TIME SLOTS -->
+    <div class="slots-section">
+      <div class="slots-label">Horários disponíveis</div>
+      <div id="slots-container">
+        <div class="no-day-selected">
+          <div class="icon">📅</div>
+          Selecione um dia na agenda acima para ver os horários
+        </div>
+      </div>
+    </div>
+
+    <div class="step-footer">
+      <div class="selected-summary" id="step1-summary">
+        <span style="color:var(--muted)">Nenhum horário selecionado ainda</span>
+      </div>
+      <button class="btn-primary" id="btn-step1" onclick="goStep(2)" disabled>
+        Próximo — Meus Dados →
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 2: DADOS ===== -->
+  <div class="panel" id="panel-2">
+    <div class="section-title">
+      <h2 class="display">Sobre <span>você</span> e o carro</h2>
+      <p>Preencha os dados abaixo para finalizar o agendamento</p>
+    </div>
+
+    <!-- SERVIÇO -->
+    <div style="margin-bottom:24px">
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Qual serviço você quer?</label>
+      </div>
+      <div class="service-options" id="service-options">
+        <div class="svc-card" onclick="selectService(this,'Lavagem Completa','~1h30','R$ 79+')">
+          <div class="svc-emoji">🚗</div>
+          <div class="svc-name">Lavagem Completa</div>
+          <div class="svc-duration">⏱ ~1h30 · Ext + interno</div>
+          <div class="svc-price">A partir de R$ 79</div>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Higienização Interna','~2h30','R$ 149+')">
+          <div class="svc-emoji">🧹</div>
+          <div class="svc-name">Higienização Interna</div>
+          <div class="svc-duration">⏱ ~2h30 · Odores e bactérias</div>
+          <div class="svc-price">A partir de R$ 149</div>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Polimento','~4h','R$ 299+')">
+          <div class="svc-emoji">✨</div>
+          <div class="svc-name">Polimento</div>
+          <div class="svc-duration">⏱ ~4h · Brilho original</div>
+          <div class="svc-price">A partir de R$ 299</div>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Cristalização','~3h','R$ 199+')">
+          <div class="svc-emoji">💎</div>
+          <div class="svc-name">Cristalização</div>
+          <div class="svc-duration">⏱ ~3h · Proteção duradoura</div>
+          <div class="svc-price">A partir de R$ 199</div>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Pacote Premium (Lavagem + Higienização)','~4h','R$ 199+')">
+          <div class="svc-emoji">⭐</div>
+          <div class="svc-name">Pacote Premium</div>
+          <div class="svc-duration">⏱ ~4h · Lavagem + Higienização</div>
+          <div class="svc-price">A partir de R$ 199</div>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Polimento + Cristalização','~6h','R$ 449+')">
+          <div class="svc-emoji">🏆</div>
+          <div class="svc-name">Polimento + Cristalização</div>
+          <div class="svc-duration">⏱ ~6h · Transformação total</div>
+          <div class="svc-price">A partir de R$ 449</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DADOS PESSOAIS + CARRO -->
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Seu nome completo *</label>
+        <input type="text" id="f-nome" placeholder="Ex: João da Silva">
+      </div>
+      <div class="form-group">
+        <label>WhatsApp *</label>
+        <input type="tel" id="f-tel" placeholder="(11) 99999-9999">
+      </div>
+      <div class="form-group">
+        <label>Marca do carro *</label>
+        <select id="f-marca">
+          <option value="">Selecione a marca...</option>
+          <option>Toyota</option><option>Volkswagen</option><option>Chevrolet</option>
+          <option>Hyundai</option><option>Honda</option><option>Jeep</option>
+          <option>Ford</option><option>Fiat</option><option>Renault</option>
+          <option>Nissan</option><option>BMW</option><option>Mercedes-Benz</option>
+          <option>Audi</option><option>Mitsubishi</option><option>Kia</option>
+          <option>Outra</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Modelo e ano *</label>
+        <input type="text" id="f-modelo" placeholder="Ex: Corolla 2021">
+      </div>
+      <div class="form-group">
+        <label>Cor do veículo</label>
+        <select id="f-cor">
+          <option value="">Selecione a cor...</option>
+          <option>Branco</option><option>Preto</option><option>Prata</option>
+          <option>Cinza</option><option>Vermelho</option><option>Azul</option>
+          <option>Verde</option><option>Amarelo</option><option>Laranja</option>
+          <option>Outra</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tipo de veículo</label>
+        <select id="f-tipo">
+          <option value="">Selecione...</option>
+          <option>Hatch</option><option>Sedan</option><option>SUV / Crossover</option>
+          <option>Picape</option><option>Van / Utilitário</option>
+          <option>Esportivo</option><option>Caminhonete</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Observações (opcional)</label>
+        <textarea id="f-obs" placeholder="Ex: Banco de couro arranhado, manchas na pintura, odor de cigarro..."></textarea>
+      </div>
+    </div>
+
+    <div class="step-footer">
+      <button class="btn-ghost" onclick="goStep(1)">← Voltar</button>
+      <button class="btn-primary" onclick="goStep(3)">Ver resumo e confirmar →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 3: CONFIRMAÇÃO ===== -->
+  <div class="panel" id="panel-3">
+    <div class="section-title">
+      <h2 class="display">Confirme seu <span>agendamento</span></h2>
+      <p>Revise as informações e envie pelo WhatsApp para confirmar</p>
+    </div>
+
+    <!-- BOOKING CARD -->
+    <div class="booking-card">
+      <div class="booking-card-header">
+        <div class="confirm-icon">📋</div>
+        <div>
+          <h3>Resumo do agendamento</h3>
+          <p>Verifique se tudo está correto antes de confirmar</p>
+        </div>
+      </div>
+      <div class="detail-grid" id="detail-grid">
+        <!-- preenchido via JS -->
+      </div>
+    </div>
+
+    <!-- WPP MESSAGE PREVIEW -->
+    <div class="wpp-preview">
+      <div class="wpp-preview-header">
+        <div class="wpp-icon">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a3.178 3.178 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        </div>
+        <span>Mensagem que será enviada</span>
+      </div>
+      <div class="wpp-msg-bubble" id="wpp-preview-text"></div>
+    </div>
+
+    <button class="btn-wpp" id="btn-wpp-final" onclick="openWhatsApp()">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a3.178 3.178 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      Confirmar pelo WhatsApp
+    </button>
+
+    <div style="text-align:center; margin-top:14px; font-size:13px; color:var(--muted)">
+      🔒 Ao clicar, você será redirecionado para o WhatsApp com a mensagem já preenchida
+    </div>
+
+    <div class="step-footer" style="margin-top:28px">
+      <button class="btn-ghost" onclick="goStep(2)">← Editar dados</button>
+      <button class="btn-ghost" onclick="goStep(1)" style="color:var(--muted); font-size:13px; border-color:var(--border)">Novo agendamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING WPP -->
+<a href="https://wa.me/5511999999999?text=Olá,%20quero%20agendar%20no%20LavaMax!" class="fab" target="_blank" title="Falar no WhatsApp">
+  <div class="fab-pulse"></div>
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a3.178 3.178 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+</a>
+
+<script>
+// ============ CONFIG ============
+const WPP_NUMBER = '5511999999999'; // ← TROQUE PELO NÚMERO REAL
+
+const ALL_SLOTS = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00'];
+
+// Simula slots ocupados por dia (formato: 'YYYY-MM-DD': ['HH:MM', ...])
+// Em produção isso viria de um backend/planilha
+const TAKEN_SLOTS = {};
+
+// ============ STATE ============
+let weekOffset = 0;
+let selectedDate = null;
+let selectedSlot = null;
+let selectedService = { name:'', duration:'', price:'' };
+
+// ============ INIT ============
+function init() {
+  renderWeek();
+}
+
+function getWeekDays(offset) {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const dayOfWeek = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) + (offset * 7));
+
+  const days = [];
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    days.push(d);
+  }
+  return days;
+}
+
+function toKey(date) {
+  return date.toISOString().split('T')[0];
+}
+
+function renderWeek() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = getWeekDays(weekOffset);
+  const first = days[0], last = days[days.length-1];
+
+  document.getElementById('week-label').textContent =
+    `${first.getDate()} de ${MONTHS_PT[first.getMonth()]} — ${last.getDate()} de ${MONTHS_PT[last.getMonth()]}`;
+
+  document.getElementById('prev-week').disabled = weekOffset <= 0;
+  document.getElementById('next-week').disabled = weekOffset >= 3;
+
+  const grid = document.getElementById('days-grid');
+  grid.innerHTML = '';
+
+  days.forEach(d => {
+    const key = toKey(d);
+    const isPast = d < today;
+    const takenCount = (TAKEN_SLOTS[key] || []).length;
+    const totalSlots = ALL_SLOTS.length;
+    const freeCount = totalSlots - takenCount;
+    const isToday = d.getTime() === today.getTime();
+    const isSelected = selectedDate && toKey(selectedDate) === key;
+
+    let availClass = 'avail-free', availText = 'Livre';
+    if (takenCount >= totalSlots) { availClass = 'avail-full'; availText = 'Cheio'; }
+    else if (takenCount >= totalSlots * 0.6) { availClass = 'avail-partial'; availText = `${freeCount} vagas`; }
+    else { availText = `${freeCount} vagas`; }
+
+    const isFull = takenCount >= totalSlots;
+    const classes = ['day-card',
+      isPast ? 'past' : '',
+      isFull && !isPast ? 'full' : '',
+      isToday ? 'today' : '',
+      isSelected ? 'selected' : ''
+    ].filter(Boolean).join(' ');
+
+    const card = document.createElement('div');
+    card.className = classes;
+    card.innerHTML = `
+      <div class="day-name">${DAYS_PT[d.getDay()]}</div>
+      <div class="day-num">${d.getDate()}</div>
+      <div class="day-availability ${availClass}">${isPast ? 'Passado' : isFull ? 'Cheio' : availText}</div>
+    `;
+
+    if (!isPast && !isFull) {
+      card.addEventListener('click', () => selectDay(d));
+    }
+    grid.appendChild(card);
+  });
+}
+
+function selectDay(date) {
+  selectedDate = date;
+  selectedSlot = null;
+  document.getElementById('btn-step1').disabled = true;
+  updateStep1Summary();
+  renderSlots(date);
+  renderWeek();
+}
+
+function renderSlots(date) {
+  const key = toKey(date);
+  const taken = TAKEN_SLOTS[key] || [];
+  const container = document.getElementById('slots-container');
+  container.innerHTML = '';
+
+  const label = document.createElement('div');
+  label.style.cssText = 'font-size:13px;color:var(--off);margin-bottom:14px;font-weight:600';
+  const dateStr = `${DAYS_PT[date.getDay()]}, ${date.getDate()} de ${MONTHS_PT[date.getMonth()]}`;
+  label.textContent = `Horários para ${dateStr}`;
+  container.appendChild(label);
+
+  const grid = document.createElement('div');
+  grid.className = 'slots-grid';
+
+  ALL_SLOTS.forEach(slot => {
+    const isTaken = taken.includes(slot);
+    const btn = document.createElement('button');
+    btn.className = `slot ${isTaken ? 'taken' : 'free'}`;
+    btn.textContent = slot;
+    btn.disabled = isTaken;
+    if (!isTaken) {
+      btn.addEventListener('click', () => {
+        selectedSlot = slot;
+        document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('btn-step1').disabled = false;
+        updateStep1Summary();
+      });
+    }
+    grid.appendChild(btn);
+  });
+
+  container.appendChild(grid);
+}
+
+function updateStep1Summary() {
+  const el = document.getElementById('step1-summary');
+  if (!selectedDate || !selectedSlot) {
+    el.innerHTML = `<span style="color:var(--muted)">Selecione um dia e horário</span>`;
+    return;
+  }
+  const dateStr = `${DAYS_PT[selectedDate.getDay()]}, ${selectedDate.getDate()} de ${MONTHS_PT[selectedDate.getMonth()]}`;
+  el.innerHTML = `
+    <span style="color:var(--muted);font-size:13px">Selecionado:</span>
+    <span class="chip">📅 ${dateStr}</span>
+    <span class="chip">🕐 ${selectedSlot}</span>
+  `;
+}
+
+function changeWeek(dir) {
+  weekOffset += dir;
+  if (weekOffset < 0) weekOffset = 0;
+  renderWeek();
+  if (selectedDate) {
+    const days = getWeekDays(weekOffset);
+    const inCurrentWeek = days.some(d => toKey(d) === toKey(selectedDate));
+    if (!inCurrentWeek) {
+      document.getElementById('slots-container').innerHTML = `
+        <div class="no-day-selected">
+          <div class="icon">📅</div>
+          Selecione um dia na agenda acima para ver os horários
+        </div>`;
+    } else {
+      renderSlots(selectedDate);
+    }
+  }
+}
+
+// ============ SERVICE SELECT ============
+function selectService(el, name, duration, price) {
+  document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedService = { name, duration, price };
+}
+
+// ============ STEP NAVIGATION ============
+function goStep(n) {
+  if (n === 2) {
+    if (!selectedDate || !selectedSlot) {
+      alert('Por favor, selecione um dia e horário antes de continuar.');
+      return;
+    }
+  }
+
+  if (n === 3) {
+    const nome = document.getElementById('f-nome').value.trim();
+    const tel = document.getElementById('f-tel').value.trim();
+    const marca = document.getElementById('f-marca').value;
+    const modelo = document.getElementById('f-modelo').value.trim();
+    if (!nome || !tel || !marca || !modelo) {
+      alert('Preencha seu nome, WhatsApp, marca e modelo do carro para continuar.');
+      return;
+    }
+    if (!selectedService.name) {
+      alert('Selecione um serviço antes de continuar.');
+      return;
+    }
+    buildConfirmation();
+  }
+
+  // Update stepper
+  document.querySelectorAll('.step').forEach((s, i) => {
+    s.classList.remove('active','done');
+    if (i + 1 < n) s.classList.add('done');
+    if (i + 1 === n) s.classList.add('active');
+  });
+  // Update step circles (done = checkmark)
+  document.querySelectorAll('.step-circle').forEach((c, i) => {
+    if (i + 1 < n) c.textContent = '✓';
+    else c.textContent = i + 1;
+  });
+
+  document.querySelectorAll('.panel').forEach((p, i) => {
+    p.classList.remove('active');
+    if (i + 1 === n) p.classList.add('active');
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============ CONFIRMATION ============
+function buildConfirmation() {
+  const nome = document.getElementById('f-nome').value.trim();
+  const tel = document.getElementById('f-tel').value.trim();
+  const marca = document.getElementById('f-marca').value;
+  const modelo = document.getElementById('f-modelo').value.trim();
+  const cor = document.getElementById('f-cor').value || '—';
+  const tipo = document.getElementById('f-tipo').value || '—';
+  const obs = document.getElementById('f-obs').value.trim() || '—';
+
+  const dateStr = `${DAYS_PT[selectedDate.getDay()]}, ${selectedDate.getDate()} de ${MONTHS_PT[selectedDate.getMonth()]}`;
+
+  const details = [
+    { label: 'Data', value: dateStr },
+    { label: 'Horário', value: selectedSlot, green: true },
+    { label: 'Serviço', value: selectedService.name },
+    { label: 'Duração estimada', value: selectedService.duration },
+    { label: 'Nome', value: nome },
+    { label: 'WhatsApp', value: tel },
+    { label: 'Veículo', value: `${marca} ${modelo}` },
+    { label: 'Cor / Tipo', value: `${cor} · ${tipo}` },
+    { label: 'Observações', value: obs },
+  ];
+
+  const grid = document.getElementById('detail-grid');
+  grid.innerHTML = '';
+  details.forEach((d, i) => {
+    const item = document.createElement('div');
+    item.className = 'detail-item';
+    item.innerHTML = `<div class="dlabel">${d.label}</div><div class="dvalue ${d.green?'green':''}">${d.value}</div>`;
+    grid.appendChild(item);
+    if (i === 3) {
+      const div = document.createElement('div');
+      div.className = 'divider-h';
+      grid.appendChild(div);
+    }
+  });
+
+  // WPP message
+  const msg = `Olá! Gostaria de confirmar meu agendamento no LavaMax Premium 🚗
+
+*📅 Data:* ${dateStr}
+*🕐 Horário:* ${selectedSlot}
+
+*🔧 Serviço:* ${selectedService.name}
+*⏱ Duração estimada:* ${selectedService.duration}
+
+*👤 Nome:* ${nome}
+*📱 Telefone:* ${tel}
+
+*🚘 Veículo:* ${marca} ${modelo}
+*🎨 Cor:* ${cor}
+*🏷 Tipo:* ${tipo}
+${obs !== '—' ? `\n*📝 Observações:* ${obs}` : ''}
+
+Aguardo a confirmação! 🙏`;
+
+  document.getElementById('wpp-preview-text').textContent = msg;
+
+  // Store for button click
+  window._wppMsg = msg;
+}
+
+function openWhatsApp() {
+  if (!window._wppMsg) return;
+  const url = `https://wa.me/${WPP_NUMBER}?text=${encodeURIComponent(window._wppMsg)}`;
+  window.open(url, '_blank');
+}
+
+// Simular alguns slots ocupados para demonstração
+function seedFakeTaken() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (let d = 0; d < 14; d++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + d);
+    if (date.getDay() === 0) continue; // domingo
+    const key = toKey(date);
+    const count = Math.floor(Math.random() * 4);
+    const shuffled = [...ALL_SLOTS].sort(() => Math.random()-.5);
+    TAKEN_SLOTS[key] = shuffled.slice(0, count);
+  }
+}
+
+// START
+seedFakeTaken();
+init();
+</script>
+</body>
+</html>
