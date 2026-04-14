@@ -542,6 +542,49 @@ input[type="hidden"] {}
 .btn-wpp:hover { background: #20c25c; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(37,211,102,.3); }
 .btn-wpp svg { width: 24px; height: 24px; fill: #000; }
 
+.owner-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(2px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.owner-panel-backdrop.active { display: flex; }
+.owner-panel {
+  background: #111827;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  width: min(920px, calc(100% - 32px));
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  box-shadow: 0 16px 50px rgba(0,0,0,.45);
+}
+.owner-panel h2 { margin-bottom: 10px; font-family: 'Bebas Neue', sans-serif; font-size: 28px; }
+.owner-panel p { margin-bottom: 18px; color: var(--muted); font-size: 14px; }
+.owner-panel .owner-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; margin-bottom: 18px; }
+.owner-panel .owner-row label { font-size: 12px; font-weight: 700; color: var(--muted); }
+.owner-panel .owner-row input,
+.owner-panel .owner-row textarea {
+  width: 100%;
+}
+.owner-panel .owner-card {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+.owner-panel .owner-card-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--off); }
+.owner-panel textarea { min-height: 100px; }
+.owner-panel .owner-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.owner-panel .owner-actions .btn-primary { padding: 12px 24px; }
+.owner-panel-close { position: absolute; top: 20px; right: 20px; background: transparent; border: 1px solid var(--border2); color: var(--off); border-radius: 12px; width: 38px; height: 38px; display: grid; place-items: center; cursor: pointer; }
+.owner-panel-close:hover { background: rgba(255,255,255,.05); }
+
 /* FLOATING WPP */
 .fab {
   position: fixed;
@@ -589,6 +632,7 @@ input[type="hidden"] {}
   <header>
     <a href="#" class="logo">Lava<span>Max</span></a>
     <span class="header-tag">Sistema de Agendamento</span>
+    <button class="btn-ghost" id="owner-mode-btn" onclick="toggleOwnerPanel()">Proprietário</button>
   </header>
 
   <!-- STEPPER -->
@@ -663,44 +707,7 @@ input[type="hidden"] {}
       <div class="form-group" style="margin-bottom:14px">
         <label>Qual serviço você quer?</label>
       </div>
-      <div class="service-options" id="service-options">
-        <div class="svc-card" onclick="selectService(this,'Lavagem Completa','~1h30','R$ 79+')">
-          <div class="svc-emoji">🚗</div>
-          <div class="svc-name">Lavagem Completa</div>
-          <div class="svc-duration">⏱ ~1h30 · Ext + interno</div>
-          <div class="svc-price">A partir de R$ 79</div>
-        </div>
-        <div class="svc-card" onclick="selectService(this,'Higienização Interna','~2h30','R$ 149+')">
-          <div class="svc-emoji">🧹</div>
-          <div class="svc-name">Higienização Interna</div>
-          <div class="svc-duration">⏱ ~2h30 · Odores e bactérias</div>
-          <div class="svc-price">A partir de R$ 149</div>
-        </div>
-        <div class="svc-card" onclick="selectService(this,'Polimento','~4h','R$ 299+')">
-          <div class="svc-emoji">✨</div>
-          <div class="svc-name">Polimento</div>
-          <div class="svc-duration">⏱ ~4h · Brilho original</div>
-          <div class="svc-price">A partir de R$ 299</div>
-        </div>
-        <div class="svc-card" onclick="selectService(this,'Cristalização','~3h','R$ 199+')">
-          <div class="svc-emoji">💎</div>
-          <div class="svc-name">Cristalização</div>
-          <div class="svc-duration">⏱ ~3h · Proteção duradoura</div>
-          <div class="svc-price">A partir de R$ 199</div>
-        </div>
-        <div class="svc-card" onclick="selectService(this,'Pacote Premium (Lavagem + Higienização)','~4h','R$ 199+')">
-          <div class="svc-emoji">⭐</div>
-          <div class="svc-name">Pacote Premium</div>
-          <div class="svc-duration">⏱ ~4h · Lavagem + Higienização</div>
-          <div class="svc-price">A partir de R$ 199</div>
-        </div>
-        <div class="svc-card" onclick="selectService(this,'Polimento + Cristalização','~6h','R$ 449+')">
-          <div class="svc-emoji">🏆</div>
-          <div class="svc-name">Polimento + Cristalização</div>
-          <div class="svc-duration">⏱ ~6h · Transformação total</div>
-          <div class="svc-price">A partir de R$ 449</div>
-        </div>
-      </div>
+      <div class="service-options" id="service-options"></div>
     </div>
 
     <!-- DADOS PESSOAIS + CARRO -->
@@ -808,24 +815,83 @@ input[type="hidden"] {}
   </div>
 </div>
 
+<div class="owner-panel-backdrop" id="owner-backdrop">
+  <div class="owner-panel">
+    <button class="owner-panel-close" onclick="toggleOwnerPanel()">✕</button>
+    <h2>Modo Proprietário</h2>
+    <p>Edite valores, horários, serviços e configurações diretamente aqui.</p>
+
+    <div class="owner-card">
+      <div class="owner-card-title">Configurações gerais</div>
+      <div class="owner-row">
+        <label for="owner-whatsapp">Número do WhatsApp</label>
+        <input id="owner-whatsapp" type="text" placeholder="5511999999999">
+      </div>
+      <div class="owner-row">
+        <label for="owner-week-count">Semanas visíveis</label>
+        <input id="owner-week-count" type="number" min="1" max="12" placeholder="4">
+      </div>
+      <div class="owner-row">
+        <label for="owner-slots">Horários disponíveis (separados por vírgula)</label>
+        <textarea id="owner-slots" placeholder="08:00,09:00,10:00,11:00,13:00"></textarea>
+      </div>
+    </div>
+
+    <div class="owner-card">
+      <div class="owner-card-title">Serviços</div>
+      <div id="owner-services-list"></div>
+      <div class="owner-actions">
+        <button class="btn-primary" onclick="saveOwnerConfig()">Salvar serviços e valores</button>
+      </div>
+    </div>
+
+    <div class="owner-card">
+      <div class="owner-card-title">Agenda e bloqueios</div>
+      <div class="owner-row">
+        <label for="owner-taken">Slots ocupados por data (JSON)</label>
+        <textarea id="owner-taken" placeholder='{"2026-04-15": ["08:00","10:00"]}'></textarea>
+      </div>
+      <div class="owner-actions">
+        <button class="btn-primary" onclick="saveOwnerConfig()">Salvar agenda</button>
+      </div>
+    </div>
+
+    <div class="owner-card" style="background:rgba(255,255,255,.04);">
+      <div class="owner-card-title">Dica</div>
+      <p>Use o painel para ajustar preços, duração do serviço, número do WhatsApp e bloquear horários específicos na agenda.</p>
+    </div>
+  </div>
+</div>
+
 <!-- FLOATING WPP -->
-<a href="https://wa.me/5511999999999?text=Olá,%20quero%20agendar%20no%20LavaMax!" class="fab" target="_blank" title="Falar no WhatsApp">
+<a id="fab-link" href="https://wa.me/5511999999999?text=Olá,%20quero%20agendar%20no%20LavaMax!" class="fab" target="_blank" title="Falar no WhatsApp">
   <div class="fab-pulse"></div>
   <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a3.178 3.178 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
 </a>
 
 <script>
 // ============ CONFIG ============
-const WPP_NUMBER = '5511999999999'; // ← TROQUE PELO NÚMERO REAL
-
-const ALL_SLOTS = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00'];
+const OWNER_CONFIG_KEY = 'lavamax-owner-config';
+let WPP_NUMBER = '5511999999999'; // ← TROQUE PELO NÚMERO REAL
+const DEFAULT_ALL_SLOTS = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00'];
+let ALL_SLOTS = [...DEFAULT_ALL_SLOTS];
+const DEFAULT_SERVICE_ITEMS = [
+  { emoji:'🚗', name:'Lavagem Completa', duration:'~1h30', price:'R$ 79+', detail:'⏱ ~1h30 · Ext + interno' },
+  { emoji:'🧹', name:'Higienização Interna', duration:'~2h30', price:'R$ 149+', detail:'⏱ ~2h30 · Odores e bactérias' },
+  { emoji:'✨', name:'Polimento', duration:'~4h', price:'R$ 299+', detail:'⏱ ~4h · Brilho original' },
+  { emoji:'💎', name:'Cristalização', duration:'~3h', price:'R$ 199+', detail:'⏱ ~3h · Proteção duradoura' },
+  { emoji:'⭐', name:'Pacote Premium', duration:'~4h', price:'R$ 199+', detail:'⏱ ~4h · Lavagem + Higienização' },
+  { emoji:'🏆', name:'Polimento + Cristalização', duration:'~6h', price:'R$ 449+', detail:'⏱ ~6h · Transformação total' },
+];
+let SERVICE_ITEMS = [...DEFAULT_SERVICE_ITEMS];
 
 const DAYS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const MONTHS_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 // Simula slots ocupados por dia (formato: 'YYYY-MM-DD': ['HH:MM', ...])
 // Em produção isso viria de um backend/planilha
-const TAKEN_SLOTS = {};
+let TAKEN_SLOTS = {};
+let weekCountMax = 4;
 
 // ============ STATE ============
 let weekOffset = 0;
@@ -835,6 +901,10 @@ let selectedService = { name:'', duration:'', price:'' };
 
 // ============ INIT ============
 function init() {
+  loadOwnerConfig();
+  renderServiceOptions();
+  const fab = document.getElementById('fab-link');
+  if (fab) fab.href = `https://wa.me/${WPP_NUMBER}?text=Olá,%20quero%20agendar%20no%20LavaMax!`;
   renderWeek();
 }
 
@@ -867,7 +937,7 @@ function renderWeek() {
     `${first.getDate()} de ${MONTHS_PT[first.getMonth()]} — ${last.getDate()} de ${MONTHS_PT[last.getMonth()]}`;
 
   document.getElementById('prev-week').disabled = weekOffset <= 0;
-  document.getElementById('next-week').disabled = weekOffset >= 3;
+  document.getElementById('next-week').disabled = weekOffset >= weekCountMax - 1;
 
   const grid = document.getElementById('days-grid');
   grid.innerHTML = '';
@@ -907,6 +977,122 @@ function renderWeek() {
     }
     grid.appendChild(card);
   });
+}
+
+function loadOwnerConfig() {
+  const saved = localStorage.getItem(OWNER_CONFIG_KEY);
+  if (!saved) return;
+  try {
+    const cfg = JSON.parse(saved);
+    WPP_NUMBER = cfg.whatsappNumber || WPP_NUMBER;
+    if (Array.isArray(cfg.allSlots) && cfg.allSlots.length) ALL_SLOTS = cfg.allSlots;
+    if (Array.isArray(cfg.serviceItems) && cfg.serviceItems.length) SERVICE_ITEMS = cfg.serviceItems;
+    if (typeof cfg.weekCount === 'number' && cfg.weekCount >= 1) weekCountMax = cfg.weekCount;
+    if (cfg.takenSlots && typeof cfg.takenSlots === 'object') TAKEN_SLOTS = cfg.takenSlots;
+  } catch (error) {
+    console.warn('Erro ao carregar configurações do proprietário:', error);
+  }
+}
+
+function saveOwnerConfig() {
+  const whatsapp = document.getElementById('owner-whatsapp').value.trim() || WPP_NUMBER;
+  const weekCount = Number(document.getElementById('owner-week-count').value) || weekCountMax;
+  const slotsText = document.getElementById('owner-slots').value.trim();
+  const takenText = document.getElementById('owner-taken').value.trim();
+
+  let allSlots = DEFAULT_ALL_SLOTS;
+  if (slotsText) allSlots = slotsText.split(',').map(s => s.trim()).filter(Boolean);
+
+  let takenSlots = {};
+  if (takenText) {
+    try { takenSlots = JSON.parse(takenText); }
+    catch (e) { alert('JSON inválido em "Slots ocupados por data". Verifique o formato.'); return; }
+  }
+
+  const serviceItems = [];
+  document.querySelectorAll('.owner-service-row').forEach(row => {
+    const emoji = row.querySelector('[data-owner="emoji"]').value.trim() || '🚗';
+    const name = row.querySelector('[data-owner="name"]').value.trim() || 'Serviço';
+    const duration = row.querySelector('[data-owner="duration"]').value.trim() || '—';
+    const price = row.querySelector('[data-owner="price"]').value.trim() || 'R$ 0';
+    const detail = row.querySelector('[data-owner="detail"]').value.trim() || duration;
+    serviceItems.push({ emoji, name, duration, price, detail });
+  });
+
+  const config = {
+    whatsappNumber: whatsapp,
+    weekCount,
+    allSlots,
+    serviceItems,
+    takenSlots,
+  };
+
+  localStorage.setItem(OWNER_CONFIG_KEY, JSON.stringify(config));
+  WPP_NUMBER = whatsapp;
+  ALL_SLOTS = allSlots;
+  SERVICE_ITEMS = serviceItems;
+  weekCountMax = weekCount;
+  TAKEN_SLOTS = takenSlots;
+  renderServiceOptions();
+  renderWeek();
+  if (selectedDate) renderSlots(selectedDate);
+  document.getElementById('fab-link').href = `https://wa.me/${WPP_NUMBER}?text=Olá,%20quero%20agendar%20no%20LavaMax!`;
+  alert('Configurações do proprietário salvas.');
+}
+
+function renderServiceOptions() {
+  const container = document.getElementById('service-options');
+  container.innerHTML = '';
+  SERVICE_ITEMS.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'svc-card';
+    card.innerHTML = `
+      <div class="svc-emoji">${item.emoji}</div>
+      <div class="svc-name">${item.name}</div>
+      <div class="svc-duration">${item.detail}</div>
+      <div class="svc-price">A partir de ${item.price}</div>
+    `;
+    card.addEventListener('click', () => selectService(card, item.name, item.duration, item.price));
+    container.appendChild(card);
+  });
+}
+
+function renderOwnerPanel() {
+  const whatsapp = document.getElementById('owner-whatsapp');
+  const weekCount = document.getElementById('owner-week-count');
+  const slots = document.getElementById('owner-slots');
+  const taken = document.getElementById('owner-taken');
+  const list = document.getElementById('owner-services-list');
+
+  whatsapp.value = WPP_NUMBER;
+  weekCount.value = weekCountMax;
+  slots.value = ALL_SLOTS.join(',');
+  taken.value = JSON.stringify(TAKEN_SLOTS, null, 2);
+
+  list.innerHTML = '';
+  SERVICE_ITEMS.forEach(item => {
+    const serviceRow = document.createElement('div');
+    serviceRow.className = 'owner-service-row';
+    serviceRow.style.display = 'grid';
+    serviceRow.style.gridTemplateColumns = '50px 1fr 1fr 1fr 1fr';
+    serviceRow.style.gap = '10px';
+    serviceRow.style.alignItems = 'center';
+    serviceRow.style.marginBottom = '10px';
+    serviceRow.innerHTML = `
+      <input data-owner="emoji" value="${item.emoji}" placeholder="Emoji">
+      <input data-owner="name" value="${item.name}" placeholder="Nome do serviço">
+      <input data-owner="duration" value="${item.duration}" placeholder="Duração">
+      <input data-owner="price" value="${item.price}" placeholder="Preço">
+      <input data-owner="detail" value="${item.detail}" placeholder="Descrição">
+    `;
+    list.appendChild(serviceRow);
+  });
+}
+
+function toggleOwnerPanel() {
+  const backdrop = document.getElementById('owner-backdrop');
+  backdrop.classList.toggle('active');
+  if (backdrop.classList.contains('active')) renderOwnerPanel();
 }
 
 function selectDay(date) {
@@ -1110,6 +1296,7 @@ function openWhatsApp() {
 
 // Simular alguns slots ocupados para demonstração
 function seedFakeTaken() {
+  if (Object.keys(TAKEN_SLOTS).length > 0) return;
   const today = new Date(); today.setHours(0,0,0,0);
   for (let d = 0; d < 14; d++) {
     const date = new Date(today);
@@ -1117,7 +1304,7 @@ function seedFakeTaken() {
     if (date.getDay() === 0) continue; // domingo
     const key = toKey(date);
     const count = Math.floor(Math.random() * 4);
-    const shuffled = [...ALL_SLOTS].sort(() => Math.random()-.5);
+    const shuffled = [...ALL_SLOTS].sort(() => Math.random() - .5);
     TAKEN_SLOTS[key] = shuffled.slice(0, count);
   }
 }
