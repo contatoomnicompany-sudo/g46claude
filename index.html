@@ -820,6 +820,9 @@ const WPP_NUMBER = '5511999999999'; // ← TROQUE PELO NÚMERO REAL
 
 const ALL_SLOTS = ['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00'];
 
+const DAYS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MONTHS_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
 // Simula slots ocupados por dia (formato: 'YYYY-MM-DD': ['HH:MM', ...])
 // Em produção isso viria de um backend/planilha
 const TAKEN_SLOTS = {};
@@ -1120,8 +1123,22 @@ function seedFakeTaken() {
 }
 
 // START
-seedFakeTaken();
-init();
+function showCalendarError(error) {
+  console.error('Erro ao inicializar o calendário LavaMax:', error);
+  const label = document.getElementById('week-label');
+  if (label) label.textContent = 'Erro ao carregar agenda';
+  const grid = document.getElementById('days-grid');
+  if (grid) grid.innerHTML = '<div class="no-day-selected">Ocorreu um erro ao carregar o calendário. Atualize a página, por favor.</div>';
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    seedFakeTaken();
+    init();
+  } catch (error) {
+    showCalendarError(error);
+  }
+});
 </script>
 </body>
 </html>
